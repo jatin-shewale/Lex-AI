@@ -1,0 +1,132 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg-main: #f8fafc;
+    --bg-card: #ffffff;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --primary: #0ea5e9;
+    --primary-hover: #0284c7;
+    --border: #e2e8f0;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Outfit', sans-serif;
+  }
+
+  ::selection {
+    background: rgba(14, 165, 233, 0.2);
+    color: #0369a1;
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--bg-main);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+    border: 2px solid var(--bg-main);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+}
+
+@layer components {
+  /* ── Premium Buttons ───────────────────────────────────────────────── */
+  .btn-primary {
+    @apply relative overflow-hidden bg-primary-600 text-white font-semibold
+           rounded-xl px-6 py-3 transition-all duration-300
+           hover:bg-primary-700 hover:shadow-premium active:scale-95
+           disabled:opacity-50 disabled:pointer-events-none;
+  }
+
+  .btn-secondary {
+    @apply border border-slate-200 bg-white text-slate-700 font-medium
+           rounded-xl px-6 py-3 transition-all duration-300
+           hover:border-slate-300 hover:bg-slate-50 active:scale-95;
+  }
+
+  .btn-ghost {
+    @apply text-slate-500 font-medium rounded-xl px-4 py-2 transition-all
+           hover:bg-slate-100 hover:text-slate-900;
+  }
+
+  /* ── Premium Cards ────────────────────────────────────────────────── */
+  .card {
+    @apply bg-white border border-slate-100 rounded-2xl shadow-premium
+           transition-all duration-300;
+  }
+
+  .card-interactive {
+    @apply card hover:shadow-premium-lg hover:-translate-y-1;
+  }
+
+  /* ── Section Wrapper ──────────────────────────────────────────────── */
+  .section-container {
+    @apply px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto;
+  }
+
+  /* ── Inputs ──────────────────────────────────────────────────────── */
+  .input-field {
+    @apply w-full bg-slate-50 border border-slate-200 rounded-xl
+           px-4 py-3 text-slate-900 placeholder:text-slate-400
+           focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10
+           transition-all duration-200;
+  }
+
+  /* ── Badges ──────────────────────────────────────────────────────── */
+  .badge {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium tracking-wide;
+  }
+  .badge-primary { @apply badge bg-primary-50 text-primary-700 border border-primary-100; }
+  .badge-success { @apply badge bg-emerald-50 text-emerald-700 border border-emerald-100; }
+  .badge-warning { @apply badge bg-amber-50 text-amber-700 border border-amber-100; }
+  .badge-error   { @apply badge bg-rose-50 text-rose-700 border border-rose-100; }
+
+  /* ── Progress ────────────────────────────────────────────────────── */
+  .progress-bg { @apply h-2 w-full bg-slate-100 rounded-full overflow-hidden; }
+  .progress-fill { @apply h-full bg-primary-500 rounded-full transition-all duration-500; }
+}
+
+/* ── Mesh Background ───────────────────────────────────────────────── */
+.mesh-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image: var(--mesh-gradient);
+  opacity: 0.6;
+}
+
+.grid-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image: 
+    linear-gradient(to right, rgba(15, 23, 42, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(15, 23, 42, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
