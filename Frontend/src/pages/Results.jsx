@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   Shield, FileText, Tag, AlertTriangle, CheckCircle,
   ChevronDown, ChevronUp, MessageSquare, BarChart3,
-  Clock, FileSearch, ArrowRight, Download, Share2, Printer
+  Clock, FileSearch, ArrowRight, Download, Share2, Printer,
+  Activity
 } from 'lucide-react'
 import { useContractStore } from '../hooks/useContractStore.js'
 
