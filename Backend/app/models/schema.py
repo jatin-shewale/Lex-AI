@@ -62,6 +62,22 @@ class QAResponse(BaseModel):
     sources: list[str]
 
 
+class ContractSummary(BaseModel):
+    id: str
+    filename: str
+    uploaded_at: str
+    size_bytes: int
+    analyzed: bool
+    vectorstore_ready: bool
+    path: str
+
+
+class ContractsResponse(BaseModel):
+    total: int
+    analyzed: int
+    contracts: list[ContractSummary]
+
+
 class NERResponse(BaseModel):
     dates: list[str]
     monetary_values: list[str]

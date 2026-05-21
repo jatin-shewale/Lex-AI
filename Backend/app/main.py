@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
 
-from app.routes import upload, analyze, qa, ner, health
+from app.routes import upload, analyze, qa, ner, health, contracts
 
 #  App factory ─
 app = FastAPI(
@@ -28,11 +28,12 @@ app.add_middleware(
 )
 
 #  Routers 
-app.include_router(health.router,  prefix="/health",  tags=["Health"])
-app.include_router(upload.router,  prefix="/upload",  tags=["Upload"])
-app.include_router(analyze.router, prefix="/analyze", tags=["Analyze"])
-app.include_router(qa.router,      prefix="/qa",      tags=["Q&A"])
-app.include_router(ner.router,     prefix="/ner",     tags=["NER"])
+app.include_router(health.router,    prefix="/health",  tags=["Health"])
+app.include_router(upload.router,    prefix="/upload",  tags=["Upload"])
+app.include_router(analyze.router,   prefix="/analyze", tags=["Analyze"])
+app.include_router(qa.router,        prefix="/qa",      tags=["Q&A"])
+app.include_router(ner.router,       prefix="/ner",     tags=["NER"])
+app.include_router(contracts.router, prefix="/contracts", tags=["Contracts"])
 
 
 #  Custom OpenAPI schema ─

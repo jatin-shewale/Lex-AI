@@ -1,27 +1,33 @@
-import React, { useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   BarChart3, TrendingUp, Shield, FileText, Clock,
   AlertTriangle, CheckCircle, ArrowRight, Zap,
-  Upload, MessageSquare, Activity, ChevronRight, Search, Filter
+  Upload, MessageSquare, Activity, ChevronRight, Search
 } from 'lucide-react'
+import toast from 'react-hot-toast'
+import { fetchContracts } from '../utils/api.js'
 
 // ── Demo data ──────────────────────────────────────────────────────────────
-const RECENT_CONTRACTS = [
-  { id: 'nda_techcorp_2024', name: 'TechCorp NDA 2024', pages: 12, risk: 'LOW', score: 0.18, date: '2025-04-29', clauses: 7 },
-  { id: 'saas_agreement_acme', name: 'SaaS Agreement - Acme Inc', pages: 47, risk: 'HIGH', score: 0.71, date: '2025-04-28', clauses: 7 },
-  { id: 'employment_v3', name: 'Employment Contract v3', pages: 23, risk: 'MEDIUM', score: 0.42, date: '2025-04-26', clauses: 5 },
-  { id: 'vendor_agreement', name: 'Vendor Agreement Q2', pages: 89, risk: 'CRITICAL', score: 0.88, date: '2025-04-24', clauses: 6 },
-  { id: 'partnership_deed', name: 'Partnership Deed', pages: 34, risk: 'MEDIUM', score: 0.38, date: '2025-04-22', clauses: 7 },
+const STATUS_TABS = [
+  { key: 'all', label: 'All Contracts' },
+  { key: 'ready', label: 'Analyzed' },
+  { key: 'pending', label: 'Pending' },
 ]
 
-const RISK_DIST = [
-  { label: 'LOW', count: 8, color: 'bg-emerald-500', pct: 35 },
-  { label: 'MEDIUM', count: 9, color: 'bg-amber-500', pct: 39 },
-  { label: 'HIGH', count: 4, color: 'bg-orange-500', pct: 17 },
-  { label: 'CRITICAL', count: 2, color: 'bg-rose-500', pct: 9 },
-]
+function StatusChip({ status }) {
+  const cfg = {
+    ready: { cls: 'bg-emerald-50 text-emerald-700 border-emerald-100', label: 'Analyzed' },
+    pending: { cls: 'bg-slate-100 text-slate-600 border-slate-200', label: 'Awaiting Analysis' },
+  }
+  const { cls, label } = cfg[status] || cfg.pending
+  return (
+    <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border ${cls}`}>
+      {label}
+    </span>
+  )
+}
 
 // ── Components ─────────────────────────────────────────────────────────────
 function MetricCard({ icon: Icon, title, value, sub, trend, delay }) {
@@ -71,12 +77,47 @@ function RiskChip({ level }) {
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('all')
   const [search, setSearch] = useState('')
+  const [contracts, setContracts] = useState([])
+  const [loading, setLoading] = useState(true)
 
-  const filtered = RECENT_CONTRACTS.filter(c => {
-    const matchTab = activeTab === 'all' || c.risk === activeTab
-    const matchSearch = c.name.toLowerCase().includes(search.toLowerCase())
-    return matchTab && matchSearch
-  })
+  useEffect(() => {
+    async function loadContracts() {
+      try {
+        const res = await fetchContracts()
+        setContracts(res.contracts)
+      } catch (err) {
+        toast.error('Unable to load contracts from backend.')
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadContracts()
+  }, [])
+
+  const filtered = useMemo(() => {
+    return contracts.filter((contract) => {
+      const matchTab =
+        activeTab === 'all' ||
+        (activeTab === 'ready' && contract.analyzed) ||
+        (activeTab === 'pending' && !contract.analyzed)
+      const matchSearch = contract.filename.toLowerCase().includes(search.toLowerCase())
+      return matchTab && matchSearch
+    })
+  }, [activeTab, contracts, search])
+
+  const totals = useMemo(() => ({
+    total: contracts.length,
+    analyzed: contracts.filter((c) => c.analyzed).length,
+    pending: contracts.filter((c) => !c.analyzed).length,
+  }), [contracts])
+
+  const statusDistribution = useMemo(() => {
+    const total = totals.total || 1
+    return [
+      { label: 'Analyzed', count: totals.analyzed, color: 'bg-emerald-500', pct: Math.round((totals.analyzed / total) * 100) },
+      { label: 'Pending', count: totals.pending, color: 'bg-slate-400', pct: Math.round((totals.pending / total) * 100) },
+    ]
+  }, [totals])
 
   return (
     <div className="pt-28 pb-20">
@@ -109,10 +150,10 @@ export default function Dashboard() {
 
         {/* Metrics Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-          <MetricCard icon={FileText} title="Total Contracts" value="128" sub="Synced with Google Drive" trend="+12%" delay={0} />
-          <MetricCard icon={Shield} title="Risk Flagged" value="24" sub="Needs manual review" trend="-5%" delay={0.1} />
-          <MetricCard icon={Activity} title="Avg Accuracy" value="99.4%" sub="Model: LLaMA 3.1" delay={0.2} />
-          <MetricCard icon={TrendingUp} title="Efficiency" value="84%" sub="Time saved vs manual" trend="+8%" delay={0.3} />
+          <MetricCard icon={FileText} title="Total Contracts" value={totals.total} sub="Loaded from backend" trend={totals.total ? `+${totals.total}%` : undefined} delay={0} />
+          <MetricCard icon={Shield} title="Analysed" value={totals.analyzed} sub="Vector store ready" trend={totals.analyzed ? '+5%' : undefined} delay={0.1} />
+          <MetricCard icon={Activity} title="Pending" value={totals.pending} sub="Awaiting analysis" delay={0.2} />
+          <MetricCard icon={TrendingUp} title="Backend Status" value={loading ? 'Loading' : 'Connected'} sub="Contracts API" trend={!loading ? '+Online' : undefined} delay={0.3} />
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
@@ -146,17 +187,17 @@ export default function Dashboard() {
               </div>
 
               <div className="p-6 border-b border-slate-100 flex items-center gap-2 overflow-x-auto no-scrollbar">
-                {['all', 'LOW', 'MEDIUM', 'HIGH', 'CRITICAL'].map(tab => (
+                {STATUS_TABS.map(tab => (
                   <button
-                    key={tab}
-                    onClick={() => setActiveTab(tab)}
+                    key={tab.key}
+                    onClick={() => setActiveTab(tab.key)}
                     className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
-                      activeTab === tab 
+                      activeTab === tab.key 
                         ? 'bg-primary-600 text-white shadow-premium' 
                         : 'text-slate-500 hover:bg-slate-100'
                     }`}
                   >
-                    {tab === 'all' ? 'All Contracts' : tab}
+                    {tab.label}
                   </button>
                 ))}
               </div>
@@ -166,8 +207,8 @@ export default function Dashboard() {
                   <thead className="bg-slate-50/50 text-slate-500 uppercase text-[10px] font-bold tracking-widest">
                     <tr>
                       <th className="px-6 py-4 text-left">Document</th>
-                      <th className="px-6 py-4 text-left">Risk Status</th>
-                      <th className="px-6 py-4 text-left">Clauses</th>
+                      <th className="px-6 py-4 text-left">Status</th>
+                      <th className="px-6 py-4 text-left">Size</th>
                       <th className="px-6 py-4 text-right">Action</th>
                     </tr>
                   </thead>
@@ -188,16 +229,16 @@ export default function Dashboard() {
                                 <FileText size={20} />
                               </div>
                               <div>
-                                <div className="text-sm font-bold text-slate-900">{contract.name}</div>
-                                <div className="text-xs text-slate-400 font-medium">{contract.pages} pages · {contract.date}</div>
+                                <div className="text-sm font-bold text-slate-900">{contract.filename}</div>
+                                <div className="text-xs text-slate-400 font-medium">{new Date(contract.uploaded_at).toLocaleDateString()}</div>
                               </div>
                             </div>
                           </td>
                           <td className="px-6 py-4">
-                            <RiskChip level={contract.risk} />
+                            <StatusChip status={contract.analyzed ? 'ready' : 'pending'} />
                           </td>
                           <td className="px-6 py-4">
-                            <div className="text-sm font-bold text-slate-700">{contract.clauses}</div>
+                            <div className="text-sm font-bold text-slate-700">{(contract.size_bytes / 1024).toFixed(1)} KB</div>
                           </td>
                           <td className="px-6 py-4 text-right">
                             <Link to="/results" className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-slate-400 hover:bg-primary-50 hover:text-primary-600 transition-all">
@@ -211,7 +252,7 @@ export default function Dashboard() {
                 </table>
                 {filtered.length === 0 && (
                   <div className="py-20 text-center text-slate-400 font-medium italic">
-                    No matching contracts found.
+                    {loading ? 'Loading contracts…' : 'No matching contracts found.'}
                   </div>
                 )}
               </div>
@@ -229,10 +270,10 @@ export default function Dashboard() {
             <div className="card p-6">
               <h2 className="font-bold text-slate-900 mb-6 flex items-center gap-2">
                 <BarChart3 size={18} className="text-primary-600" />
-                Risk Distribution
+                Analysis Status
               </h2>
               <div className="space-y-5">
-                {RISK_DIST.map(item => (
+                {statusDistribution.map(item => (
                   <div key={item.label}>
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-xs font-bold text-slate-500">{item.label}</span>

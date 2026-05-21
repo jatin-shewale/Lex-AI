@@ -13,10 +13,11 @@ const SAMPLE_QUESTIONS = [
   'Who owns the IP?',
 ]
 
-function Message({ msg, i }) {
+const Message = React.forwardRef(function Message({ msg, i }, ref){
   const isUser = msg.role === 'user'
   return (
     <motion.div
+      ref={ref}
       initial={{ opacity: 0, y: 10, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.3 }}
@@ -63,7 +64,7 @@ function Message({ msg, i }) {
       </div>
     </motion.div>
   )
-}
+})
 
 export default function QA() {
   const { contractId } = useContractStore()

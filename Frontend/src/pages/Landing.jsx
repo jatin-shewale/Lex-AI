@@ -7,7 +7,7 @@ import {
   TrendingDown, Award, Scale, FileText, Activity, ShieldCheck
 } from 'lucide-react'
 
-// ── Hero Section ────────────────────────────────────────────────────────────
+// ── Hero Section 
 function Hero() {
   return (
     <section className="relative pt-32 pb-20 overflow-hidden">
@@ -129,7 +129,7 @@ function Hero() {
   )
 }
 
-// ── Feature Card ────────────────────────────────────────────────────────────
+// ── Feature Card 
 function FeatureCard({ icon: Icon, title, desc, delay }) {
   return (
     <motion.div

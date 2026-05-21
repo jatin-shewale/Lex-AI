@@ -36,6 +36,12 @@ export async function extractEntities(text) {
   return res.data
 }
 
+// ── Contracts / Dashboard ─────────────────────────────────────────────────
+export async function fetchContracts() {
+  const res = await api.get('/contracts')
+  return res.data
+}
+
 // ── Health ─────────────────────────────────────────────────────────────────
 export async function checkHealth() {
   const res = await api.get('/health')

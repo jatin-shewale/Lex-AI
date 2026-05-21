@@ -1,0 +1,155 @@
+Project: LexAI — Contract Analysis Intelligence
+
+This file contains a detailed interview-style Q&A summary for the LexAI contract analysis project.
+It is designed to help explain the project clearly during interviews, including architecture, features,
+technical decisions, backend/frontend integration, dataset usage, and future improvements.
+
+---
+
+Q: What is this project and what problem does it solve?
+A: LexAI is an AI-powered contract analysis platform designed to accelerate legal review and risk assessment.
+It addresses the challenge of manually reading and summarizing complex legal contracts by automatically parsing
+PDF contracts, extracting critical clauses, scoring risk, and enabling document-grounded conversational Q&A.
+The product is intended for legal teams, contract managers, and business stakeholders who need fast,
+accurate contract intelligence.
+
+Q: What are the main features of LexAI?
+A: The project includes:
+  - Multi-strategy PDF parsing and contract ingestion.
+  - Clause extraction for key legal categories such as termination, liability, confidentiality, payment terms, indemnity,
+    governing law, and dispute resolution.
+  - A risk scoring module with a 4-tier risk classification: LOW, MEDIUM, HIGH, CRITICAL.
+  - A Retrieval-Augmented Generation (RAG) Q&A assistant that answers questions using actual contract content.
+  - Named Entity Recognition (NER) for parties, dates, monetary amounts, locations, durations, and percentages.
+  - A polished React frontend with an interactive dashboard, analysis flow, results pages, and chat-style Q&A.
+
+Q: What technology stack does LexAI use?
+A: LexAI uses a modern full-stack architecture:
+  - Frontend: React 18, Vite, Tailwind CSS, Framer Motion, React Router, Lucide Icons, react-hot-toast.
+  - Backend: Python 3.10+ with FastAPI for API routing, Pydantic for schema validation, and CORS support.
+  - AI/ML: LLM inference via LLaMA 3.1 (70B) served through Groq, embeddings with
+    `sentence-transformers/all-MiniLM-L6-v2`, and FAISS for local vector search.
+  - Data orchestration: LangChain and custom contract chunking logic.
+
+Q: How is the project structured?
+A: The repository is split into two main folders:
+  - `Frontend/`: React app and UI implementation.
+    - `src/pages/`: page views like Dashboard, Analyze, Results, QA.
+    - `src/components/`: reusable UI pieces and layout.
+    - `src/utils/api.js`: backend API client.
+    - `src/hooks/useContractStore.js`: lightweight shared state store.
+  - `Backend/`: FastAPI service and AI pipelines.
+    - `app/routes/`: API endpoints for upload, analyze, QA, NER, health, and contracts.
+    - `app/services/`: core logic for chunking, clause extraction, embeddings, LLM service, NER, vector store.
+    - `app/models/schema.py`: Pydantic request/response models.
+    - `config/settings.py`: environment and directory settings.
+    - `data/`: storage for uploaded PDFs, processed files, and FAISS vector indices.
+
+Q: How does the user interaction flow work?
+A: The main flow is:
+  1. User uploads a PDF contract through the frontend.
+  2. Frontend calls `POST /api/upload` to save the PDF and return its file path.
+  3. Frontend calls `POST /api/analyze` with the uploaded path.
+  4. Backend parses the PDF, chunks text, computes embeddings, builds a FAISS vector store,
+     extracts clause and risk information, and returns analysis metadata.
+  5. The frontend stores the contract ID and analysis results, then navigates to the results view.
+  6. For interactive questions, the frontend calls `POST /api/qa` with a question and contract ID.
+  7. The backend performs retrieval from the saved vector store and uses the LLM to generate grounded answers.
+
+Q: What backend endpoints are implemented?
+A: Key endpoints include:
+  - `POST /upload`: upload PDF contract files.
+  - `POST /analyze`: analyze an uploaded contract path and build a vector index.
+  - `POST /qa`: answer contract-specific questions using RAG.
+  - `POST /ner`: extract named entities from raw extracted contract text.
+  - `GET /health`: return service health status and readiness.
+  - `GET /contracts`: list uploaded contracts and whether they have been analyzed.
+
+Q: How is the frontend integrated with the backend?
+A: The frontend uses `Frontend/src/utils/api.js` to centralize API calls.
+It uses a dev proxy configured in `vite.config.js` so all `/api/*` requests are forwarded to `http://localhost:8000`.
+The dashboard fetches live contract metadata from `GET /api/contracts`, and the analysis and Q&A pages talk to
+`/api/upload`, `/api/analyze`, and `/api/qa`.
+
+Q: Which dataset was used for fine-tuning?
+A: The fine-tuning dataset is configured in `Backend/app/finetuning/config.yaml`:
+  - `dataset_path: "data/processed/legal_contracts.jsonl"`
+This means the project expects a JSONL dataset at `Backend/data/processed/legal_contracts.jsonl` containing
+legal contract text examples for training.
+
+Q: What is RAG and how is it used here?
+A: RAG stands for Retrieval-Augmented Generation.
+In LexAI, the contract text is chunked and stored in a FAISS vector index. When the user asks a question,
+relevant chunks are retrieved from the index and provided as context to the LLM. This ensures answers are grounded
+in the actual contract content and can include source citations.
+
+Q: What are the core AI/ML components?
+A: Core components include:
+  - `app/services/chunker.py`: splits contract text into chunks with overlap for retrieval.
+  - `app/services/embeddings.py`: computes embeddings for text chunks using an embedding model.
+  - `app/services/vectorstore.py`: saves and loads FAISS indexes for each contract.
+  - `app/services/llm_service.py`: wraps the LLM client configuration and readiness checks.
+  - `app/services/clause_extractor.py`: extracts key legal clauses via LLM prompts.
+  - `app/routes/qa.py`: implements the question/answer pipeline over retrieved contract chunks.
+
+Q: What are the main challenges and how were they addressed?
+A: Key challenges included:
+  - Reliable PDF parsing: addressed with a fallback parsing chain to handle a wide variety of PDF formats.
+  - Grounded legal answers: solved by using vector retrieval combined with LLM prompting to avoid hallucinations.
+  - Fast contract search: implemented local FAISS indexes to provide low-latency semantic search.
+  - UX for legal workflows: built a focused dashboard and guided analysis flow so users can upload, analyze,
+    review results, and ask follow-up questions without jumping across pages.
+
+Q: How is state managed in the frontend?
+A: The frontend uses a lightweight custom store in `frontend/src/hooks/useContractStore.js`.
+It stores upload state, current contract ID, analysis results, and selected file details in a module-level state object.
+This avoids the complexity of Redux while still sharing state across pages.
+
+Q: What parts of the project were recently extended?
+A: The dashboard was integrated with the backend contract listing endpoint, which now loads actual uploaded contract metadata
+and displays analysis readiness instead of static demo data.
+That integration uses `fetchContracts()` and populates dashboard totals, search, status filtering, and table rows.
+
+Q: How can the project be run locally?
+A: Run the backend and frontend separately:
+  1. Backend:
+     - `cd Backend`
+     - `python -m venv venv`
+     - `.
+venv\Scripts\activate`
+     - `pip install -r requirements.txt`
+     - `python -m spacy download en_core_web_sm`
+     - set `GROQ_API_KEY` in `.env`
+     - `uvicorn app.main:app --reload --port 8000`
+  2. Frontend:
+     - `cd Frontend`
+     - `npm install`
+     - `npm run dev`
+
+Q: What improvements or next steps are planned?
+A: Potential improvements include:
+  - adding real contract metadata extraction (parties, effective date, renewal terms) in the dashboard,
+  - supporting multi-document contract comparison,
+  - adding authentication and role-based access control,
+  - adding incremental upload history and PDF preview,
+  - improving offline or batch analysis workflows,
+  - supporting advanced model selection and fine-tuning through the UI.
+
+Q: What is the project’s dataset and fine-tuning approach?
+A: The dataset path is `data/processed/legal_contracts.jsonl`.
+The fine-tuning pipeline uses LoRA training scripts under `Backend/app/finetuning/`.
+Configuration is defined in `Backend/app/finetuning/config.yaml`, and the training driver is `train_lora.py`.
+It tokenizes JSONL records, splits them into train/validation sets, and fine-tunes a Llama base model for legal contract tasks.
+
+Q: What would you say is the project’s biggest value proposition?
+A: LexAI reduces manual contract review time by blending semantic search, clause extraction, and legal question answering in a single product.
+It provides legal teams with fast, evidence-backed insights and makes contract intelligence accessible without requiring deep machine learning expertise.
+
+---
+
+Notes for interview usage:
+  - Focus on the problem statement first: manual contract review is slow and error-prone.
+  - Emphasize the integration of frontend UX, backend AI pipeline, and real-time retrieval.
+  - Mention the dataset path explicitly when asked about training data.
+  - If asked about deployment, point to the `uvicorn` backend and `vite` frontend setup.
+  - If asked about technical risk, discuss hallucination mitigation via RAG and using FAISS indexes.
