@@ -1,15 +1,3 @@
-"""
-app/routes/analyze.py — Full contract analysis pipeline.
-
-Pipeline:
-  1. Extract text from PDF (multi-strategy)
-  2. Chunk text (clause-aware)
-  3. Build + save FAISS vector store
-  4. Extract clauses via LLM
-  5. Analyse risk via LLM
-  6. Return structured response
-"""
-
 import time
 import uuid
 from pathlib import Path

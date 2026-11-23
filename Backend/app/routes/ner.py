@@ -1,7 +1,3 @@
-"""
-app/routes/ner.py — Named Entity Recognition endpoint.
-"""
-
 from fastapi import APIRouter
 
 from app.models.schema import NERResponse, TextRequest

@@ -1,18 +1,3 @@
-"""
-app/finetuning/train_lora.py
-Fine-tune LLaMA-7B on legal contracts using QLoRA (4-bit + LoRA).
-
-Achieves 87% F1 on legal NER — +23 points over base model.
-Trained on 5,000+ legal documents, reduces analysis time by 40%.
-
-Usage:
-    python -m app.finetuning.train_lora --config app/finetuning/config.yaml
-
-Requirements:
-    pip install transformers peft bitsandbytes trl datasets accelerate
-    GPU with ≥8 GB VRAM (QLoRA) or ≥24 GB for full fp16
-"""
-
 import argparse
 import logging
 import os

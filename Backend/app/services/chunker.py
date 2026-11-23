@@ -1,12 +1,3 @@
-"""
-app/services/chunker.py — Clause-aware text chunking for legal contracts.
-
-Two modes:
-  • clause_split  — splits on numbered / lettered clause headings first,
-                    then falls back to sentence-boundary sliding window
-  • sliding_window — fixed-size overlap chunks (always available)
-"""
-
 import re
 import logging
 from config.settings import get_settings

@@ -1,11 +1,3 @@
-"""
-app/services/llm_service.py — LLM client wrapper (Groq / OpenAI-compatible).
-
-Uses Groq's llama3-70b-8192 by default.
-Swap model_name in .env to use any Groq model, or point base_url to
-a local vLLM / Ollama endpoint for the fine-tuned LLaMA.
-"""
-
 import logging
 from functools import lru_cache
 from config.settings import get_settings
@@ -17,7 +9,7 @@ settings = get_settings()
 @lru_cache(maxsize=1)
 def get_llm():
     """
-    Return a cached LangChain ChatOpenAI instance pointing at Groq.
+    Return a cached Groq API client.
     """
     if not settings.groq_api_key:
         raise EnvironmentError(
@@ -25,20 +17,32 @@ def get_llm():
         )
 
     try:
-        from langchain_openai import ChatOpenAI
+        from groq import Groq
 
-        llm = ChatOpenAI(
-            model=settings.model_name,
+        client = Groq(
             api_key=settings.groq_api_key,
-            base_url="https://api.groq.com/openai/v1",
-            temperature=settings.llm_temperature,
-            max_tokens=settings.llm_max_tokens,
         )
-        logger.info("LLM ready: %s via Groq ✓", settings.model_name)
-        return llm
+        logger.info("Groq client ready for model: %s", settings.model_name)
+        return client
     except Exception as exc:
         logger.error("Failed to initialise LLM: %s", exc)
         raise
+
+
+def chat_completion(system_prompt: str, user_prompt: str) -> str:
+    response = get_llm().chat.completions.create(
+        model=settings.model_name,
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ],
+        temperature=settings.llm_temperature,
+        max_tokens=settings.llm_max_tokens,
+    )
+    content = response.choices[0].message.content
+    if content is None:
+        raise RuntimeError("Groq returned an empty response.")
+    return content
 
 
 def llm_is_ready() -> bool:

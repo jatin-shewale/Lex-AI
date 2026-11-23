@@ -1,12 +1,7 @@
-"""
-app/models/schema.py — Request / Response Pydantic models.
-"""
-
 from typing import Any
 from pydantic import BaseModel, Field
 
 
-# ─── Requests ─────────────────────────────────────────────────────────────────
 
 class QueryRequest(BaseModel):
     question: str = Field(..., min_length=3, example="What are the termination conditions?")
@@ -20,8 +15,6 @@ class TextRequest(BaseModel):
 class AnalyzeRequest(BaseModel):
     path: str = Field(..., example="data/contracts/sample.pdf")
 
-
-# ─── Responses ────────────────────────────────────────────────────────────────
 
 class UploadResponse(BaseModel):
     message: str

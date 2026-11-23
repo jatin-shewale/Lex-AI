@@ -1,9 +1,3 @@
-"""
-app/services/embeddings.py — HuggingFace embedding model wrapper.
-
-Singleton pattern so the model is loaded once per process.
-"""
-
 import logging
 from functools import lru_cache
 from config.settings import get_settings

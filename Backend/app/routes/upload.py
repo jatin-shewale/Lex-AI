@@ -1,7 +1,3 @@
-"""
-app/routes/upload.py — Contract PDF upload endpoint.
-"""
-
 import os
 import uuid
 from pathlib import Path

@@ -1,10 +1,3 @@
-"""
-app/services/vectorstore.py — FAISS vector store management.
-
-Stores one FAISS index per contract (keyed by contract_id).
-Supports save, load, search, and deletion.
-"""
-
 import logging
 import os
 import pickle

@@ -1,6 +1,3 @@
-"""
-app/routes/contracts.py — List uploaded and analyzed contract files.
-"""
 
 from datetime import datetime
 from pathlib import Path

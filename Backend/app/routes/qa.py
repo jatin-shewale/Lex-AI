@@ -1,16 +1,9 @@
-"""
-app/routes/qa.py — Retrieval-Augmented Q&A over a contract.
-
-Uses FAISS vector search to retrieve top-k relevant chunks,
-then feeds them as context to the LLM for grounded answering.
-"""
 
 from fastapi import APIRouter, HTTPException
 
 from app.models.schema import QAResponse, QueryRequest
-from app.services.llm_service import get_llm
+from app.services.llm_service import chat_completion
 from app.services.vectorstore import load_vectorstore, vectorstore_exists
-from langchain_core.messages import HumanMessage
 
 router = APIRouter()
 
@@ -60,13 +53,8 @@ def ask_question(req: QueryRequest):
 
     # ── LLM answer ────────────────────────────────────────────────────────────
     try:
-        llm = get_llm()
         prompt = _PROMPT_TEMPLATE.format(context=context, question=req.question)
-        response = llm.invoke(
-            [HumanMessage(content=prompt)],
-            system=_SYSTEM,
-        )
-        answer = response.content.strip()
+        answer = chat_completion(_SYSTEM, prompt).strip()
     except Exception as exc:
         raise HTTPException(status_code=502, detail=f"LLM Q&A failed: {exc}") from exc
 

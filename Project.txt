@@ -27,7 +27,7 @@ Q: What technology stack does LexAI use?
 A: LexAI uses a modern full-stack architecture:
   - Frontend: React 18, Vite, Tailwind CSS, Framer Motion, React Router, Lucide Icons, react-hot-toast.
   - Backend: Python 3.10+ with FastAPI for API routing, Pydantic for schema validation, and CORS support.
-  - AI/ML: LLM inference via LLaMA 3.1 (70B) served through Groq, embeddings with
+  - AI/ML: LLM inference via GPT OSS 120B served through Groq, embeddings with
     `sentence-transformers/all-MiniLM-L6-v2`, and FAISS for local vector search.
   - Data orchestration: LangChain and custom contract chunking logic.
 

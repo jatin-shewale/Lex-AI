@@ -1,14 +1,7 @@
-"""
-app/services/clause_extractor.py — LLM-powered legal clause extraction.
-
-Extracts 7 standard clause categories and returns structured JSON.
-Falls back to regex heuristics if the LLM call fails.
-"""
 
 import json
 import logging
 import re
-from langchain_core.messages import HumanMessage
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +36,7 @@ def extract_clauses(text: str) -> dict:
 
     Returns a dict with keys from CLAUSE_TYPES.
     """
-    from app.services.llm_service import get_llm
+    from app.services.llm_service import chat_completion
 
     prompt = _USER_TEMPLATE.format(
         keys=", ".join(CLAUSE_TYPES),
@@ -51,12 +44,7 @@ def extract_clauses(text: str) -> dict:
     )
 
     try:
-        llm = get_llm()
-        response = llm.invoke(
-            [HumanMessage(content=prompt)],
-            system=_SYSTEM,
-        )
-        raw = response.content.strip()
+        raw = chat_completion(_SYSTEM, prompt).strip()
 
         # Strip markdown fences if present
         raw = re.sub(r"^```(?:json)?\s*", "", raw)

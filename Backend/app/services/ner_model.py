@@ -1,11 +1,3 @@
-"""
-app/services/ner_model.py — Legal Named Entity Recognition (NER).
-
-Two-tier approach:
-  1. spaCy transformer model  (if available) — high accuracy
-  2. Regex patterns            — always available, zero dependencies
-"""
-
 import re
 import logging
 from dataclasses import dataclass, field

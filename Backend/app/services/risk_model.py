@@ -1,17 +1,6 @@
-"""
-app/services/risk_model.py — LLM-powered contract risk analysis.
-
-Returns a structured risk report with:
-  • risk_level  : LOW / MEDIUM / HIGH / CRITICAL
-  • score       : 0.0 – 1.0
-  • issues      : list of identified risk factors
-  • recommendations : actionable suggestions for each issue
-"""
-
 import json
 import logging
 import re
-from langchain_core.messages import HumanMessage
 
 logger = logging.getLogger(__name__)
 
@@ -45,17 +34,12 @@ def analyze_risk(text: str) -> dict:
 
     Returns structured dict with risk_level, score, issues, recommendations.
     """
-    from app.services.llm_service import get_llm
+    from app.services.llm_service import chat_completion
 
     prompt = _USER_TEMPLATE.format(text=text[:6000])
 
     try:
-        llm = get_llm()
-        response = llm.invoke(
-            [HumanMessage(content=prompt)],
-            system=_SYSTEM,
-        )
-        raw = response.content.strip()
+        raw = chat_completion(_SYSTEM, prompt).strip()
 
         # Strip markdown fences
         raw = re.sub(r"^```(?:json)?\s*", "", raw)

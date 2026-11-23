@@ -1,12 +1,3 @@
-"""
-app/services/parser.py — Robust multi-strategy PDF text extraction.
-
-Strategy waterfall:
-  1. PyMuPDF (fitz)  — fast, handles most text-layer PDFs
-  2. pdfplumber      — better for complex tables / multi-column layouts
-  3. pdfminer.six    — last resort for tricky encodings
-"""
-
 import logging
 from pathlib import Path
 
